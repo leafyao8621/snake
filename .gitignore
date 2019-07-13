@@ -1,0 +1,9 @@
+.vscode
+snake/.vscode
+snake/src/*.o
+snake/snake.a
+snake/snake.h
+snake_ncurses/.vscode
+snake_ncurses/snake
+snake_ncurses/.log
+snake_ncurses/src/*.o
