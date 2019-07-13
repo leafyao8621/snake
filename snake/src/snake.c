@@ -8,7 +8,7 @@ static struct {
     unsigned col : 8;
     unsigned len : 8;
     unsigned dir : 8;
-} snake[100], *head;
+} snake[100], *head, *iter;
 
 static struct {
     unsigned hrow : 8;
@@ -26,7 +26,7 @@ static struct {
 
 static struct {
     unsigned cont : 8;
-    unsigned block : 8;
+    unsigned score : 8;
     unsigned next : 8;
     unsigned ext : 8;
 } state = {0, 0, 4, 0};
@@ -41,7 +41,7 @@ void init(unsigned char width, unsigned char height) {
     state.cont = 1;
     meta.width = width;
     meta.height = height;
-    meta.frow = rand() % height;
+    meta.frow = rand() % (height - 2) + 2;
     meta.fcol = rand() % width;
     head = snake;
     head->col = (width >> 1) + 1;
@@ -98,15 +98,16 @@ void proceed(void) {
     update.hcol = head->col;
     update.hrow = head->row;
     if (head->col < 0 || head->col >= meta.width ||
-        head->row < 0 || head->row >= meta.height) {
+        head->row < 2 || head->row >= meta.height) {
         state.cont = 0;
         return;
     }
     if (head->col == meta.fcol && head->row == meta.frow) {
         state.ext = 1;
         meta.fcol = rand() % meta.width;
-        meta.frow = rand() % meta.height;
+        meta.frow = rand() % (meta.height - 2) + 2;
         snake->len++;
+        state.score++;
     }
     head->len++;
     snake->len--;
@@ -114,6 +115,42 @@ void proceed(void) {
         memmove(snake, snake + 1, 99);
         head--;
         snake->len--;
+    }
+    for (iter = snake; iter != head; iter++) {
+        switch (iter->dir) {
+        case 0:
+            if (head->row == iter->row &&
+                head->col <= iter->col &&
+                head->col > iter->col - iter->len) {
+                state.cont = 0;
+                return;
+            }
+            break;
+        case 1:
+            if (head->row == iter->row &&
+                head->col >= iter->col &&
+                head->col < iter->col + iter->len) {
+                state.cont = 0;
+                return;
+            }
+            break;
+        case 2:
+            if (head->col == iter->col &&
+                head->row <= iter->row &&
+                head->row > iter->row - iter->len) {
+                state.cont = 0;
+                return;
+            }
+            break;
+        case 3:
+            if (head->col == iter->col &&
+                head->row >= iter->row &&
+                head->row < iter->row + iter->len) {
+                state.cont = 0;
+                return;
+            }
+            break;
+        }
     }
 }
 
@@ -140,4 +177,8 @@ _Bool get_ext(void) {
 void get_food(int* fcol, int* frow) {
     *fcol = meta.fcol;
     *frow = meta.frow;
+}
+
+int get_score(void) {
+    return state.score;
 }

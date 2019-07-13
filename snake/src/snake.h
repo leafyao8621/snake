@@ -8,4 +8,5 @@ void get_update(int* hcol, int* hrow, int* tcol, int* trow);
 _Bool get_cont(void);
 _Bool get_ext(void);
 void get_food(int* fcol, int* frow);
+int get_score(void);
 #endif

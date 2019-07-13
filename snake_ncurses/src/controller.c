@@ -27,11 +27,13 @@ void initialize(void) {
     }
     if (xf) mvwvline(w, 0, 100, 0, y);
     if (yf) mvwhline(w, 100, 0, 0, x);
+    mvwhline(w, 1, 0, 0, x);
     mvwprintw(w, y >> 1, (x >> 1) - 2, "%s", "0000");
     init(x, y);
     int fcol, frow;
     get_food(&fcol, &frow);
     mvwprintw(w, frow, fcol, "%c", '*');
+    mvwprintw(w, 0, 0, "Score:%4d", get_score());
     // mvwprintw(w, 2, 0, "%3d %3d", fcol, frow);
 }
 
@@ -45,6 +47,7 @@ static inline void render(void) {
         int fcol, frow;
         get_food(&fcol, &frow);
         mvwprintw(w, frow, fcol, "%c", '*');
+        mvwprintw(w, 0, 0, "Score:%4d", get_score());
     } else {
         mvwprintw(w, trow, tcol, "%c", ' ');
     }
@@ -70,9 +73,9 @@ void main_loop(void) {
         }
         clock_t now = clock();
         if (now - last >= CLOCKS_PER_SEC / 10) {
-            last = now;
             proceed();
             render();
+            last = clock();
         }
     }
 }
@@ -81,6 +84,7 @@ void cleanup(void) {
     nodelay(w, FALSE);
     clear();
     mvwprintw(w, y >> 1, (x >> 1) - 4, "%s", "Game Over");
+    mvwprintw(w, (y >> 1) + 1, (x >> 1) - 5, "Score:%4d", get_score());
     getch();
     endwin();
 }
