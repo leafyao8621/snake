@@ -24,9 +24,12 @@ static struct {
     unsigned fcol : 8;
 } meta;
 
-static _Bool cont = 0;
-static _Bool block = 0;
-unsigned char next = 4;
+static struct {
+    unsigned cont : 8;
+    unsigned block : 8;
+    unsigned next : 8;
+    unsigned ext : 8;
+} state = {0, 0, 4, 0};
 
 static void log_msg(const char* msg) {
     FILE* f = fopen(".log", "a");
@@ -35,7 +38,7 @@ static void log_msg(const char* msg) {
 }
 
 void init(unsigned char width, unsigned char height) {
-    cont = 1;
+    state.cont = 1;
     meta.width = width;
     meta.height = height;
     meta.frow = rand() % height;
@@ -47,18 +50,19 @@ void init(unsigned char width, unsigned char height) {
     head->dir = 0;
 }
 
-static void commit_change() {
+static void commit_change(void) {
     if (head - snake == 99) return;
     head++;
     head->col = head[-1].col;
     head->row = head[-1].row;
     head->len = 1;
-    head->dir = next;
+    head->dir = state.next;
 }
 
 void proceed(void) {
-    if (!cont) return;
-    if (next != 4) commit_change();
+    if (!(state.cont)) return;
+    state.ext = 0;
+    if (state.next != 4) commit_change();
     switch (snake->dir) {
     case 0:
         update.tcol = snake->col - snake->len + 1;
@@ -77,9 +81,6 @@ void proceed(void) {
         update.trow = snake->row + snake->len - 1;
         break;
     }
-    char buf[10];
-    // snprintf(buf, 10, "%d\n", snake->len);
-    // log_msg(buf);
     switch (head->dir) {
     case 0:
         head->col++;
@@ -98,8 +99,14 @@ void proceed(void) {
     update.hrow = head->row;
     if (head->col < 0 || head->col >= meta.width ||
         head->row < 0 || head->row >= meta.height) {
-        cont = 0;
+        state.cont = 0;
         return;
+    }
+    if (head->col == meta.fcol && head->row == meta.frow) {
+        state.ext = 1;
+        meta.fcol = rand() % meta.width;
+        meta.frow = rand() % meta.height;
+        snake->len++;
     }
     head->len++;
     snake->len--;
@@ -108,12 +115,11 @@ void proceed(void) {
         head--;
         snake->len--;
     }
-    block = 0;
 }
 
 void change_dir(unsigned char dir) {
     if (head->dir == dir || (head->dir >> 1) == (dir >> 1)) return;
-    next = dir;
+    state.next = dir;
 }
 
 void get_update(int* hcol, int* hrow, int* tcol, int* trow) {
@@ -124,5 +130,14 @@ void get_update(int* hcol, int* hrow, int* tcol, int* trow) {
 }
 
 _Bool get_cont(void) {
-    return cont;
+    return state.cont;
+}
+
+_Bool get_ext(void) {
+    return state.ext;
+}
+
+void get_food(int* fcol, int* frow) {
+    *fcol = meta.fcol;
+    *frow = meta.frow;
 }

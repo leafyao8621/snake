@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <time.h>
 #include <ncurses.h>
 #include "../../snake/snake.h"
@@ -12,8 +13,8 @@ void initialize(void) {
     curs_set(0);
     cbreak();
     nodelay(w, TRUE);
-    
     getmaxyx(w, y, x);
+    srand(time(0));
     _Bool xf, yf;
     xf = yf = 0;
     if (x > 100) {
@@ -28,15 +29,25 @@ void initialize(void) {
     if (yf) mvwhline(w, 100, 0, 0, x);
     mvwprintw(w, y >> 1, (x >> 1) - 2, "%s", "0000");
     init(x, y);
+    int fcol, frow;
+    get_food(&fcol, &frow);
+    mvwprintw(w, frow, fcol, "%c", '*');
+    // mvwprintw(w, 2, 0, "%3d %3d", fcol, frow);
 }
 
 static inline void render(void) {
     int hcol, hrow, tcol, trow;
     get_update(&hcol, &hrow, &tcol, &trow);
-    mvwprintw(w, 0, 0, "%3d %3d", hcol, hrow);
-    mvwprintw(w, 1, 0, "%3d %3d", tcol, trow);
+    // mvwprintw(w, 0, 0, "%3d %3d", hcol, hrow);
+    // mvwprintw(w, 1, 0, "%3d %3d", tcol, trow);
     mvwprintw(w, hrow, hcol, "%c", '0');
-    mvwprintw(w, trow, tcol, "%c", ' ');
+    if (get_ext()) {
+        int fcol, frow;
+        get_food(&fcol, &frow);
+        mvwprintw(w, frow, fcol, "%c", '*');
+    } else {
+        mvwprintw(w, trow, tcol, "%c", ' ');
+    }
 }
 
 void main_loop(void) {
