@@ -5,7 +5,7 @@ LIB =  ../snake/snake.a
 BIN = snake
 
 %.o: %.c
-	$(CC) -c $< -o $@ -lncurses
+	$(CC) -c $< -o $@
 
 $(BIN): $(OBJ)
 	$(CC) $(OBJ) $(LIB) -o $(BIN) -lncurses
