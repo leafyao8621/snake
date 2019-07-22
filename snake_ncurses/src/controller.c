@@ -59,17 +59,28 @@ void main_loop(void) {
         int c = getch();
         switch (c) {
         case KEY_LEFT:
+        case 'a':
+        case 'A':
             change_dir(1);
             break;
         case KEY_RIGHT:
+        case 'd':
+        case 'D':
             change_dir(0);
             break;
         case KEY_UP:
+        case 'w':
+        case 'W':
             change_dir(3);
             break;
         case KEY_DOWN:
+        case 's':
+        case 'S':
             change_dir(2);
             break;
+        case 'q':
+        case 'Q':
+            return;
         }
         clock_t now = clock();
         if (now - last >= CLOCKS_PER_SEC / 10) {

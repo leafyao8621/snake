@@ -112,7 +112,7 @@ void proceed(void) {
     head->len++;
     snake->len--;
     if (!(snake->len)) {
-        memmove(snake, snake + 1, 99);
+        memmove(snake, snake + 1, (head - snake) * 4);
         head--;
         snake->len--;
     }
